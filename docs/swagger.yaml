@@ -1,0 +1,218 @@
+basePath: /
+definitions:
+  types.BasicProfileDto:
+    properties:
+      firstName:
+        type: string
+      lastName:
+        type: string
+    type: object
+  types.ChangePasswordDto:
+    properties:
+      currentPassword:
+        type: string
+      newPassword:
+        type: string
+    required:
+    - currentPassword
+    - newPassword
+    type: object
+  types.GetUserResponseDto:
+    properties:
+      ID:
+        type: string
+      email:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+    required:
+    - ID
+    - email
+    - firstName
+    - lastName
+    type: object
+  types.RegisterRequestDto:
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - firstName
+    - lastName
+    - password
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: A sample microservice built using gin, gorm
+  license: {}
+  title: sample-go-app
+  version: "0.1"
+paths:
+  /api/users/signup/:
+    post:
+      consumes:
+      - application/json
+      description: registers user and returns a access token along with response
+      parameters:
+      - description: user registration
+        in: body
+        name: value
+        required: true
+        schema:
+          $ref: '#/definitions/types.RegisterRequestDto'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User registered successfully
+          schema:
+            type: string
+        "400":
+          description: Could not bind request data, may contain unknown or missing
+            fields
+          schema:
+            type: string
+        "422":
+          description: user not created
+          schema:
+            type: string
+      summary: user registration
+  /api/v1/users/:
+    delete:
+      parameters:
+      - description: Authorization Header
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User deleted successfully
+          schema:
+            type: string
+        "400":
+          description: User info not present in context
+          schema:
+            type: string
+        "404":
+          description: User Not Found
+          schema:
+            type: string
+        "422":
+          description: Unable to delete user
+          schema:
+            type: string
+      summary: delete a user based on userID provided
+    get:
+      description: get all users from the database
+      parameters:
+      - description: Authorization Header
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.GetUserResponseDto'
+            type: object
+        "400":
+          description: User info not present in context
+          schema:
+            type: string
+        "404":
+          description: User not found
+          schema:
+            type: string
+      summary: fetch all users from the database
+    patch:
+      consumes:
+      - application/json
+      description: update a cluster by changing any fields -> firstname | lastname
+      parameters:
+      - description: Authorization Header
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: update cluster
+        in: body
+        name: value
+        required: true
+        schema:
+          $ref: '#/definitions/types.BasicProfileDto'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: uUser details updated successfully
+          schema:
+            type: string
+        "400":
+          description: User info not present in context
+          schema:
+            type: string
+        "404":
+          description: User not found
+          schema:
+            type: string
+        "422":
+          description: Unable to update user
+          schema:
+            type: string
+      summary: updates user based on details provided
+  /api/v1/users/password/:
+    patch:
+      consumes:
+      - application/json
+      description: update a password by providing  -> current-password | new-password
+      parameters:
+      - description: Authorization Header
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: update password
+        in: body
+        name: value
+        required: true
+        schema:
+          $ref: '#/definitions/types.ChangePasswordDto'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: password updated sucessfully
+          schema:
+            type: string
+        "400":
+          description: User info not present in context
+          schema:
+            type: string
+        "404":
+          description: invalid user name or password
+          schema:
+            type: string
+        "422":
+          description: unable to change password
+          schema:
+            type: string
+      summary: updates password with new password provided
+swagger: "2.0"

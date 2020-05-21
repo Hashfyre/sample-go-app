@@ -9,14 +9,13 @@ import (
 
 // 	serviceNameKey and others that define contents of gin.Context.Keys
 const (
-	ServiceNameKey   = "service_name"
-	HostNameKey      = "host_name"
-	RequestIDKey     = "request_id" //
-	RequestPathKey   = "request_path"
-	RequestMethodKey = "request_method"
-	RequestStartKey  = "request_start"
-	RequestEndKey    = "request_end"
-	UserIDKey        = "user_id" //
+	ServiceNameKey   = "service_name"   // middleware.Context
+	HostNameKey      = "host_name"      // middleware.Context
+	RequestIDKey     = "request_id"     // middleware.Context
+	RequestPathKey   = "request_path"   // middleware.Context
+	RequestMethodKey = "request_method" // middleware.Context
+	RequestStartKey  = "request_start"  // middleware.Benchmark
+	UserIDKey        = "user_id"        // middleware.BasicAuth
 )
 
 func getCtxID(c *gin.Context, key string) (uuid.UUID, error) {

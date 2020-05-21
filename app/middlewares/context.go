@@ -27,11 +27,11 @@ func AppContext() gin.HandlerFunc {
 			return
 		}
 
-		requestID := p_uuid.MustUUID()
-
 		c.Set(context.ServiceNameKey, serviceName)
 		c.Set(context.HostNameKey, hostName)
-		c.Set(context.RequestIDKey, requestID)
+		c.Set(context.RequestIDKey, p_uuid.MustUUID())
+		c.Set(context.RequestMethodKey, c.Request.Method)
+		c.Set(context.RequestPathKey, c.Request.URL.String())
 
 		c.Next()
 	}

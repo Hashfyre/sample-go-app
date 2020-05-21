@@ -7,7 +7,6 @@ import (
 	db "github.com/hashfyre/sample-go-app/app/database"
 	"github.com/hashfyre/sample-go-app/app/models"
 	"github.com/hashfyre/sample-go-app/app/routers"
-	//"github.com/hashfyre/sample-go-app/pkg/trace"
 )
 
 // @title  sample-go-app

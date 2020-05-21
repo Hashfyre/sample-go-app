@@ -3,8 +3,10 @@ package handlers
 import (
 	"log"
 	"net/http"
+	"runtime"
 
 	"github.com/gin-gonic/gin"
+	"github.com/opentracing/opentracing-go"
 
 	"github.com/hashfyre/sample-go-app/app/context"
 	"github.com/hashfyre/sample-go-app/app/controllers"
@@ -12,9 +14,13 @@ import (
 	"github.com/hashfyre/sample-go-app/app/types"
 )
 
+// RegisterNoAuthUserRoutes - unauthenticated routes
+func RegisterNoAuthUserRoutes(router *gin.RouterGroup) {
+	router.POST("/signup/", usersRegistration)
+}
+
 // RegisterUsersRoutes - registers gin user routes that neeed auth
 func RegisterUsersRoutes(router *gin.RouterGroup) {
-	router.POST("/signup/", usersRegistration)
 	router.GET("/", getUserDetails)
 	router.PATCH("/", updateUser)
 	router.DELETE("/", deleteUser)
@@ -33,6 +39,12 @@ func RegisterUsersRoutes(router *gin.RouterGroup) {
 // @Router /api/users/signup/ [post]
 // UsersRegistration does user registration
 func usersRegistration(c *gin.Context) {
+	span := opentracing.SpanFromContext(c.Request.Context())
+	if span != nil {
+		span.SetBaggageItem("os", runtime.GOOS)
+		span.SetBaggageItem("arch", runtime.GOARCH)
+	}
+
 	var request types.RegisterRequestDto
 	if err := c.ShouldBindJSON(&request); err != nil {
 		log.Println(err)
@@ -69,6 +81,12 @@ func usersRegistration(c *gin.Context) {
 // @Router /api/v1/users/ [get]
 // getUserDetails returns current user details
 func getUserDetails(c *gin.Context) {
+	span := opentracing.SpanFromContext(c.Request.Context())
+	if span != nil {
+		span.SetBaggageItem("os", runtime.GOOS)
+		span.SetBaggageItem("arch", runtime.GOARCH)
+	}
+
 	userID, err := context.GetCtxUserID(c)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, errUserInfoContext)
@@ -108,8 +126,13 @@ func getUserDetails(c *gin.Context) {
 // @Router /api/v1/users/ [patch]
 // updateUser update allowed fields of a user/profile
 func updateUser(c *gin.Context) {
-	var payloadJSON types.BasicProfileDto
+	span := opentracing.SpanFromContext(c.Request.Context())
+	if span != nil {
+		span.SetBaggageItem("os", runtime.GOOS)
+		span.SetBaggageItem("arch", runtime.GOARCH)
+	}
 
+	var payloadJSON types.BasicProfileDto
 	if err := c.ShouldBindJSON(&payloadJSON); err != nil {
 		log.Println(err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, types.ResponseError{
@@ -167,6 +190,12 @@ func updateUser(c *gin.Context) {
 // @Router /api/v1/users/ [delete]
 // deleteUser disables current user
 func deleteUser(c *gin.Context) {
+	span := opentracing.SpanFromContext(c.Request.Context())
+	if span != nil {
+		span.SetBaggageItem("os", runtime.GOOS)
+		span.SetBaggageItem("arch", runtime.GOARCH)
+	}
+
 	userID, err := context.GetCtxUserID(c)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, errUserInfoContext)

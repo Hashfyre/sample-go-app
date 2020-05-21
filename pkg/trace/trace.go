@@ -2,7 +2,6 @@ package trace
 
 import (
 	"io"
-	"log"
 
 	otrace "github.com/opentracing/opentracing-go"
 	"github.com/uber/jaeger-client-go"
@@ -21,7 +20,6 @@ func NewTracer(cfg Config) (otrace.Tracer, io.Closer, error) {
 	)
 
 	if err != nil {
-		log.Println(err)
 		return nil, nil, errCreateTracer
 	}
 

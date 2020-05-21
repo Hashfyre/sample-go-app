@@ -1,6 +1,8 @@
 package trace
 
 import (
+	"time"
+
 	"github.com/uber/jaeger-client-go/config"
 )
 
@@ -11,6 +13,34 @@ const (
 	RateLimitingSampler   = "ratelimiting"
 	RepoteSampler         = "remote"
 )
+
+type Constant struct {
+	Enabled bool
+}
+
+type Probablilistic struct {
+	Probability float64
+}
+
+type RateLimiting struct {
+	SpansPerSec uint
+}
+
+type Remote struct {
+	Probability     float64
+	ServerURL       string
+	RefreshInterval time.Duration
+	MaxOp           int
+	LateBinding     bool
+}
+
+type Sampler struct {
+	Type          string
+	Constant      Constant
+	Probabilistic Probablilistic
+	RateLimiting  RateLimiting
+	Remote        Remote
+}
 
 func NewSamplerConfig(sampler Sampler) config.SamplerConfig {
 	switch sampler.Type {

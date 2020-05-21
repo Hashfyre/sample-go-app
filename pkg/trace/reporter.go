@@ -1,6 +1,8 @@
 package trace
 
 import (
+	"time"
+
 	"github.com/uber/jaeger-client-go/config"
 )
 
@@ -9,6 +11,27 @@ const (
 	LocalAgentReporter = "localagent"
 	CollectorReporter  = "collector"
 )
+
+type LocalAgent struct {
+	Host string
+	Port string
+}
+
+type Collector struct {
+	Endpoint string
+	User     string
+	Password string
+	Headers  map[string]string
+}
+
+type Reporter struct {
+	Type                string
+	QueueSize           int
+	BufferFlushInterval time.Duration
+	LogSpans            bool
+	LocalAgent          LocalAgent
+	Collector           Collector
+}
 
 func NewReporterConfig(reporter Reporter) config.ReporterConfig {
 	switch reporter.Type {

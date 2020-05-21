@@ -1,15 +1,19 @@
 package routers
 
 import (
+	"log"
 	"net/http"
 
 	swaggerFiles "github.com/swaggo/files" // swaggo embed files
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"github.com/gin-gonic/gin"
+	"github.com/opentracing-contrib/go-gin/ginhttp"
+	"github.com/opentracing/opentracing-go"
 
 	"github.com/hashfyre/sample-go-app/app/handlers"
 	"github.com/hashfyre/sample-go-app/app/middlewares"
+	"github.com/hashfyre/sample-go-app/app/tracer"
 	"github.com/hashfyre/sample-go-app/app/types"
 	_ "github.com/hashfyre/sample-go-app/docs" // Swaggo dependency
 )
@@ -33,11 +37,27 @@ func Setup() *gin.Engine {
 	// Context Metadata
 	router.Use(middleware.AppContext())
 
+	// tracing
+	tracer, closer, err := tracer.InitTracer()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	opentracing.SetGlobalTracer(tracer)
+	opentracing.SetGlobalTracer(tracer)
+	defer closer.Close()
+	router.Use(ginhttp.Middleware(tracer))
+
 	// Setting up api group
 	// Setup Controllers for each
 	api := router.Group("api")
 	v1 := api.Group("v1")
+
+	user := v1.Group("user")
+	handlers.RegisterNoAuthUserRoutes(user)
+
 	users := v1.Group("users")
+	v1.Use(middleware.BasicAuth())
 	handlers.RegisterUsersRoutes(users)
 
 	// Set up Swaggo path here

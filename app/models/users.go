@@ -120,5 +120,3 @@ func (user User) UpdateOne(data User) (*User, error) {
 
 	return result, nil
 }
-
-// ---------------------------------------------------------------------

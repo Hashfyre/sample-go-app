@@ -38,6 +38,20 @@ func UsersRegistration(firstName, lastName, email, password string) (*models.Use
 	return user, nil
 }
 
+// UserLogin login user
+func UserLogin(email string, password string) (*models.User, error) {
+	user, err := models.User{Email: email}.GetOne()
+	if err != nil {
+		return nil, errors.New("User does not exist")
+	}
+
+	if isValidPassword(*user, password) != nil {
+		return nil, errors.New("Invalid credentials")
+	}
+
+	return user, nil
+}
+
 // GetAllUsers returns all user data across the platform
 // sans sensitive data like password
 func GetAllUsers() ([]models.User, error) {
@@ -128,6 +142,12 @@ func DeleteUser(userID uuid.UUID) (int64, error) {
 	return 1, err
 }
 
+// IsValidPassword checks whether the stored password is valid for an User
+// Database will only save the encrypted string, you should check it by util function.
+// 	if err := serModel.checkPassword("password0"); err != nil { password error }
+// Should be in controller
 func isValidPassword(user models.User, password string) error {
-	return bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	bytePassword := []byte(password)
+	byteHashedPassword := []byte(user.Password)
+	return bcrypt.CompareHashAndPassword(byteHashedPassword, bytePassword)
 }

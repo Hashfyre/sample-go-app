@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sample-go-app
+  namespace: sample-go-app
+  labels:
+    env: test
+data:
+  APP_PORT: "80"
+  POSTGRES_HOST: "postgres.sample-go-app.svc.cluster.local"
+  POSTGRES_PORT: "5432"
+  POSTGRES_USER: "postgres"
+  POSTGRES_PASSWORD: "postgres"
+  POSTGRES_DB: "sample"
+  GORM_LOG: "true"
+  GORM_CONN_MAX_LIFETIME: "2s"
+  GORM_CONN_MAX_OPEN: "10"
+  GORM_CONN_MAX_IDLE: "5"
+  TRACER_APP_NAME: "sample-go-app"
+  TRACER_SAMPLING_PROBABILITY: "0"
+  TRACER_SAMPLING_RATE: "0"
+  TRACER_REPORTER_QUEUE_SIZE: "10"
+  TRACER_REPORTER_BUFFER_FLUSH_INTERVAL: "10s"
+  TRACER_REPORTER_LOG_SPANS: "true"
+  TRACER_REPORTER_LOCAL_AGENT_HOST: "localhost" # points to jaeger-sidecar (auto-injected)
+  TRACER_REPORTER_LOCAL_AGENT_PORT: "6831" # points to jaeger-sidecar (auto-injected) // jaeger.Thrift compact
+  TRACER_REPORTER_COLLECTOR_ENDPOINT: ""
+  TRACER_REPORTER_COLLECTOR_USER: ""
+  TRACER_REPORTER_COLLECTOR_PASSWORD: ""

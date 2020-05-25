@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: sample-go-app
+    env: test
+  name: sample-go-app
+  namespace: sample-go-app
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: sample-go-app
+  sessionAffinity: None
+  type: ClusterIP

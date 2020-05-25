@@ -1,0 +1,55 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    "sidecar.jaegertracing.io/inject": "true"
+  labels:
+    app: sample-go-app
+    env: test
+  name: sample-go-app
+  namespace: sample-go-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sample-go-app
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: sample-go-app
+    spec:
+      containers:
+      - image: hashfyre/sample-go-app:0.1.0
+        imagePullPolicy: Always
+        command:
+          - "/app/sample-go-app"
+        name: sample-go-app
+        envFrom:
+        - configMapRef:
+            name: sample-go-app
+        ports:
+          - containerPort: 80
+            protocol: TCP
+        resources:
+          limits:
+            cpu: 1
+            memory: 500Mi
+          requests:
+            cpu: 500m
+            memory: 250Mi
+        livenessProbe:
+          httpGet:
+            path: /healthz/
+            port: 80
+          initialDelaySeconds: 50
+          failureThreshold: 1
+          periodSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /healthz/
+            port: 80
+          initialDelaySeconds: 50
+          failureThreshold: 1
+          periodSeconds: 3

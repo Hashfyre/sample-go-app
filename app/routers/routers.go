@@ -42,8 +42,7 @@ func Setup() *gin.Engine {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	opentracing.SetGlobalTracer(tracer)
+	log.Println("initialized tracer: ", tracer)
 	opentracing.SetGlobalTracer(tracer)
 	defer closer.Close()
 	router.Use(ginhttp.Middleware(tracer))

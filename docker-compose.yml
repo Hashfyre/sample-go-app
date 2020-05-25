@@ -68,6 +68,7 @@ services:
       - "14271:14271" # /metrics , / (health)
     command:
       - --reporter.grpc.host-port=jaeger-collector:14250
+      - --log-level=debug
     restart: on-failure
     depends_on:
       - jaeger-collector
@@ -88,6 +89,8 @@ services:
       - "9411:9411" # zipkin.Thrift/JSON/proto
       - "14269:14269" # # /metrics , / (health)
       - "16686:16686" # /api/*, /ui
+    command:
+      - --log-level=debug
     volumes:
       - badger:/badger
     networks:

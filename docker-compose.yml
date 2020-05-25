@@ -23,8 +23,8 @@ services:
       TRACER_REPORTER_QUEUE_SIZE: "10"
       TRACER_REPORTER_BUFFER_FLUSH_INTERVAL: "10s"
       TRACER_REPORTER_LOG_SPANS: "true"
-      TRACER_REPORTER_LOCAL_AGENT_HOST: "jaeger-agent" # dummy value, will point to jaeger-agent-sidecar in k8s manifest
-      TRACER_REPORTER_LOCAL_AGENT_PORT: "80" # dummy value, will point to jaeger-agent-sidecar in k8s manifest
+      TRACER_REPORTER_LOCAL_AGENT_HOST: "jaeger-agent"
+      TRACER_REPORTER_LOCAL_AGENT_PORT: "6831"
       TRACER_REPORTER_COLLECTOR_ENDPOINT: ""
       TRACER_REPORTER_COLLECTOR_USER: ""
       TRACER_REPORTER_COLLECTOR_PASSWORD: ""
@@ -33,11 +33,13 @@ services:
     networks:
       - sample-go-app
     ports:
-      - "8080:8080"
+      - "8080:80"
     links:
       - "postgres:db"
     depends_on:
       - postgres
+      - jaeger-agent
+      - jaeger-collector
   postgres:
     image: postgres:11
     container_name: sample-db
@@ -55,8 +57,45 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+  jaeger-agent:
+    image: jaegertracing/jaeger-agent:1.16
+    container_name: jaeger-agent
+    ports:
+      - "6831:6831/udp" # jaeger.Thrift compact
+      - "6832:6832/udp" # jaeger.Thrift binary // nodejs client
+      - "5775:5775/udp" # zipkin.Thrift compact
+      - "5778:5778" # serve configs
+      - "14271:14271" # /metrics , / (health)
+    command:
+      - --reporter.grpc.host-port=jaeger-collector:14250
+    restart: on-failure
+    depends_on:
+      - jaeger-collector
+    networks:
+      - sample-go-app
+  jaeger-collector:
+    image: jaegertracing/all-in-one:1.16
+    container_name: jaeger-collector
+    environment:
+      SPAN_STORAGE_TYPE: badger
+      BADGER_EPHEMERAL: "false"
+      BADGER_DIRECTORY_VALUE: /badger/data
+      BADGER_DIRECTORY_KEY: /badger/key
+    ports:
+      - "14267:14267" # Tchannel jaeger-agent --> jaeger.Thrift compact
+      - "14250:14250" # gRPC jaeger-agent --> model.proto
+      - "14268:14268" # jaeger-client (app) --> jaeger.Thrift binary
+      - "9411:9411" # zipkin.Thrift/JSON/proto
+      - "14269:14269" # # /metrics , / (health)
+      - "16686:16686" # /api/*, /ui
+    volumes:
+      - badger:/badger
+    networks:
+      - sample-go-app
 volumes:
   pgdb:
+    driver: local
+  badger:
     driver: local
 networks:
   sample-go-app:

@@ -17,9 +17,7 @@ type Database struct {
 
 // Init - sets the connection parameters for the global DB singleton
 func Init(config Config) *Database {
-	log.Print("database conf: ", config)
 	dsn := getDSN(config.Postgres)
-	log.Println("dsn: ", dsn)
 
 	db, err := gorm.Open("postgres", dsn)
 	if err != nil {
@@ -41,6 +39,5 @@ func Init(config Config) *Database {
 // DSN generates the postgres connection string
 func getDSN(postgres Postgres) string {
 	// Remove SSL mode off before production
-	log.Println("postgres conf: ", postgres)
 	return fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s sslmode=disable", postgres.Host, postgres.Port, postgres.User, postgres.DB, postgres.Password)
 }

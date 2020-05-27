@@ -3,8 +3,6 @@ services:
   sample-go-app:
     build:
       context: .
-    networks:
-      - host
     container_name: sample-app
     environment:
       APP_PORT: "80"
@@ -105,7 +103,10 @@ services:
       - sample-go-app
   jaeger-query:
     image: jaegertracing/jaeger-query
-    command: ["--cassandra.keyspace=jaeger_v1_dc1", "--cassandra.servers=cassandra"]
+    command:
+      - --cassandra.keyspace=jaeger_v1_dc1
+      - --cassandra.servers=cassandra
+      - --log-level=debug
     ports:
       - "16686:16686"
       - "16687"

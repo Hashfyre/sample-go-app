@@ -77,27 +77,19 @@ services:
     networks:
       - sample-go-app
   jaeger-collector:
-    image: jaegertracing/jaeger-collector
+    image: jaegertracing/all-in-one:latest
     container_name: jaeger-collector
-    # environment:
-    #   SPAN_STORAGE_TYPE: badger
-    #   BADGER_EPHEMERAL: "false"
-    #   BADGER_DIRECTORY_VALUE: /badger/data
-    #   BADGER_DIRECTORY_KEY: /badger/key
     ports:
       - "9411:9411"   # zipkin.Thrift/JSON/proto
       - "14250:14250" # gRPC jaeger-agent --> model.proto
       - "14267:14267" # Tchannel jaeger-agent --> jaeger.Thrift compact
       - "14268:14268" # jaeger-client (app) --> jaeger.Thrift binary
       - "14269:14269" # # /metrics , / (health)
-      # - "16686:16686" # /api/*, /ui
     command:
       - --log-level=debug
       - --cassandra.keyspace=jaeger_v1_dc1
       - --cassandra.servers=cassandra
       - --collector.zipkin.http-port=9411
-    # volumes:
-    #   - badger:/badger
     restart: on-failure
     networks:
       - sample-go-app
@@ -128,8 +120,6 @@ services:
 volumes:
   pgdb:
     driver: local
-  # badger:
-  #   driver: local
 networks:
   sample-go-app:
     external: true

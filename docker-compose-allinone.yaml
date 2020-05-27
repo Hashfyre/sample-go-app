@@ -1,0 +1,88 @@
+version: '3'
+services:
+  sample-go-app:
+    build:
+      context: .
+    container_name: sample-app
+    environment:
+      APP_PORT: "80"
+      POSTGRES_HOST: "postgres"
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: "sample"
+      GORM_LOG: "true"
+      GORM_CONN_MAX_LIFETIME: "2s"
+      GORM_CONN_MAX_OPEN: "10"
+      GORM_CONN_MAX_IDLE: "5"
+      TRACER_APP_NAME: "sample-go-app"
+      TRACER_SAMPLING_PROBABILITY: "0"
+      TRACER_SAMPLING_RATE: "0"
+      TRACER_REPORTER_QUEUE_SIZE: "10"
+      TRACER_REPORTER_BUFFER_FLUSH_INTERVAL: "10s"
+      TRACER_REPORTER_LOG_SPANS: "true"
+      TRACER_REPORTER_LOCAL_AGENT_HOST: "jaeger-collector"
+      TRACER_REPORTER_LOCAL_AGENT_PORT: "6831"
+      TRACER_REPORTER_COLLECTOR_ENDPOINT: ""
+      TRACER_REPORTER_COLLECTOR_USER: ""
+      TRACER_REPORTER_COLLECTOR_PASSWORD: ""
+    command:
+      - ./sample-go-app
+    networks:
+      - sample-go-app
+    ports:
+      - "8080:80"
+    links:
+      - "postgres:db"
+    restart: on-failure
+    depends_on:
+      - postgres
+      - jaeger-collector
+  postgres:
+    image: postgres:11
+    container_name: sample-db
+    environment:
+      POSTGRES_DB: sample
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - pgdb:/var/lib/postgresql/data
+    networks:
+      - sample-go-app
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  jaeger-collector:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger-collector
+    environment:
+      SPAN_STORAGE_TYPE: badger
+      BADGER_EPHEMERAL: "false"
+      BADGER_DIRECTORY_VALUE: /badger/data
+      BADGER_DIRECTORY_KEY: /badger/key
+    ports:
+      - "6831:6831/udp" # jaeger.Thrift compact
+      - "9411:9411"   # zipkin.Thrift/JSON/proto
+      - "14250:14250" # gRPC jaeger-agent --> model.proto
+      - "14267:14267" # Tchannel jaeger-agent --> jaeger.Thrift compact
+      - "14268:14268" # jaeger-client (app) --> jaeger.Thrift binary
+      - "14269:14269" # # /metrics , / (health)
+      - "16686:16686" # /api/*, /ui
+    command:
+      - --log-level=debug
+    volumes:
+      - badger:/badger
+    restart: on-failure
+    networks:
+      - sample-go-app
+volumes:
+  pgdb:
+    driver: local
+  badger:
+    driver: local
+networks:
+  sample-go-app:
+    external: true

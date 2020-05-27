@@ -1,3 +1,6 @@
+vendor:
+	go get ./...
+	go mod vendor
 dev:
 	export GO111MODULE=on
 	go run -mod=vendor main.go
